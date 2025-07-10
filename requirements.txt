@@ -1,2 +1,3 @@
 -e git+https://github.com/galbot-ioai/physics_sim_edu.git#subdirectory=src/synthnova_config&egg=synthnova_config
 -e git+https://github.com/galbot-ioai/physics_sim_edu.git#egg=physics_simulator
+git+https://github.com/Cruz-Caine/Simple-Controller
