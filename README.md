@@ -20,6 +20,7 @@ python examples-given/verify.py
 
 - `examples-given/` - Original example files
 - `examples-working/` - Working versions of examples
+- `controller/` - Robot controller implementation and documentation
 - `requirements.txt` - Project dependencies
 
 ## Examples
@@ -40,6 +41,10 @@ python examples-given/verify.py
 ### Camera Integration
 - `4_4_1_front_head_camera.py` - Front head camera setup
 - `4_4_2_left_wrist_camera.py` - Left wrist camera configuration
+
+## Robot Control
+
+For detailed robot control mapping and usage instructions, see [Controller Documentation](controller/CONTROLLER.MD).
 
 ## Usage
 
