@@ -23,6 +23,10 @@ def is_PS_pressed(state : dict):
         return False
     return True
 
+def is_Options_pressed(state : dict):
+    if state['Options'] == 0:
+        return False
+    return True
 
 def is_R1_pressed(state : dict):
     if state['R1'] == 0:
@@ -31,6 +35,16 @@ def is_R1_pressed(state : dict):
 
 def is_L1_pressed(state : dict):
     if state['L1'] == 0:
+        return False
+    return True
+
+def is_Circle_pressed(state : dict):
+    if state['Circle'] == 0:
+        return False
+    return True
+
+def is_Cross_pressed(state : dict):
+    if state['Cross'] == 0:
         return False
     return True
 
