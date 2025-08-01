@@ -99,13 +99,11 @@ while physics_simulator.is_running():
     else:
         # Chasis Control
         current_joint_positions = galbot_interface.chassis.get_joint_positions()
-        print(current_joint_positions)
         #xy_arr =  [(scs.get_left_Y(state))*Y_MULTIPLIER*-1, (scs.get_left_X(state))*X_MULTIPLIER*-1,current_joint_positions[2]]
         rot_arr = [0,0,(scs.get_right_X(state))*TURN_MULTIPLIER]
         xy_arr =  [(scs.get_left_Y(state))*Y_MULTIPLIER*-1, (scs.get_left_X(state))*X_MULTIPLIER*-1,current_joint_positions[2]]
 
         target_joint_positions = list(map(lambda x, y: x + y, xy_arr, rot_arr))  
-        print(target_joint_positions)
         galbot_interface.chassis.set_joint_positions(target_joint_positions,True)
 
     # If controller is freshly preshed activate the switch, if its been held down do nothing
