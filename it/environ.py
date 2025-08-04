@@ -1,6 +1,6 @@
 from physics_simulator import PhysicsSimulator
 from typing import Optional
-import dataclasses
+from dataclasses import dataclass
 from synthnova_config import (
     MujocoConfig,
     PhysicsSimulatorConfig,
@@ -40,6 +40,7 @@ from physics_simulator.utils.control_utils import BasicPathFollower
 
 from physics_simulator.utils.state_machine import SimpleStateMachine
 
+@dataclass
 class DetectedObject:
     """Data class for detected object information"""
     class_name: str
@@ -64,7 +65,7 @@ class VisionModelInterface:
             depth_image: Depth image from camera (optional)
             
         Returns:
-            List of detected objects with their poses in camera frame
+            list of detected objects with their poses in camera frame
         """
         # This is a placeholder implementation
         # Replace this with your actual vision model
@@ -77,7 +78,7 @@ class DummyYoloSegmentationModel(VisionModelInterface):
         super().__init__()
         self.simulator = simulator
         self.robot = robot
-        self.object_classes = ["cube", "bin"]  # Supported object classes
+        self.object_classes = ["Cube", "Bin"]  # Supported object classes
     
     def detect_objects(self, rgb_image: np.ndarray, depth_image: Optional[np.ndarray] = None) -> list[DetectedObject]:
         """
@@ -88,7 +89,7 @@ class DummyYoloSegmentationModel(VisionModelInterface):
         # Get ground truth poses for supported objects
         for obj_class in self.object_classes:
             # Get object state from simulator
-            obj_state = self.simulator.get_object_state(f"/World/{obj_class.capitalize()}")
+            obj_state = self.simulator.get_object_state(f"/World/{obj_class}")
             world_position = obj_state["position"]
             world_orientation = obj_state["orientation"]
             
@@ -188,7 +189,7 @@ class IOAIEnv:
 
         current_pos, _ = self._get_current_state()
         self.start_pos = (current_pos[0], current_pos[1])
-        self.goal_pos = (10, 10)
+        self.goal_pos = (4, 4)
         
         self.path = self.planner.find_path(self.start_pos, self.goal_pos)
         print(f"Robot actual start position: {self.start_pos}")
@@ -315,18 +316,18 @@ class IOAIEnv:
         self.simulator.add_object(cube_config)
 
         # Add toy
-        toy_config = MeshConfig(
-            prim_path="/World/cone",
-            mjcf_path=Path()
-            .joinpath(self.simulator.synthnova_assets_directory)
-            .joinpath("synthnova_assets")
-            .joinpath("objects")
-            .joinpath("cone")
-            .joinpath("cone.xml"),
-            position=[0.7, -0.2, 0.5],
-            orientation=[0, 0, 0, 1],
-        )
-        self.simulator.add_object(toy_config)
+        # toy_config = MeshConfig(
+        #     prim_path="/World/toy",
+        #     mjcf_path=Path()
+        #     .joinpath(self.simulator.synthnova_assets_directory)
+        #     .joinpath("synthnova_assets")
+        #     .joinpath("objects")
+        #     .joinpath("toy")
+        #     .joinpath("toy.xml"),
+        #     position=[0.7, -0.2, 0.5],
+        #     orientation=[0, 0, 0, 1],
+        # )
+        # self.simulator.add_object(toy_config)
 
         # Add extrusion
         extrusion_config = MeshConfig(
@@ -474,6 +475,137 @@ class IOAIEnv:
         # Initialize the simulator
         self.simulator.initialize()
 
+
+    # def _setup_simulator(self, headless=False):
+    #     """
+    #     Setup the simulator.
+    #     """
+    #     # Create simulator config
+    #     sim_config = PhysicsSimulatorConfig(
+    #         mujoco_config=MujocoConfig(headless=headless)
+    #     )
+        
+    #     # Initialize the simulator
+    #     self.simulator = PhysicsSimulator(sim_config)
+
+    #     # Add default scene (default ground plane)
+    #     self.simulator.add_default_scene()
+
+    #     # Add robot
+    #     robot_config = RobotConfig(
+    #         prim_path="/World/Galbot",
+    #         name="galbot_one_foxtrot",
+    #         mjcf_path=Path()
+    #         .joinpath(self.simulator.synthnova_assets_directory)
+    #         .joinpath("synthnova_assets")
+    #         .joinpath("robots")
+    #         .joinpath("galbot_one_foxtrot_description_simplified")
+    #         .joinpath("galbot_one_foxtrot.xml"),
+    #         position=[0, 0, 0],
+    #         orientation=[0, 0, 0, 1]
+    #     )
+    #     self.simulator.add_robot(robot_config)
+    #     self.robot = self.simulator.get_robot("/World/Galbot")
+
+    #     # Add front head RGB camera (RealSense D405)
+    #     front_head_rgb_camera_config = RgbCameraConfig(
+    #         name="front_head_rgb_camera",
+    #         prim_path=os.path.join(
+    #             self.robot.prim_path,
+    #             "head_link2",
+    #             "head_end_effector_mount_link",
+    #             "front_head_rgb_camera",
+    #         ),
+    #         translation=[
+    #             0.10084319533055261,
+    #             -0.059042081352783105,
+    #             0.03184978861787491
+    #         ],
+    #         rotation=[
+    #             -0.1654571792421115, 
+    #             0.6935589352367344,
+    #             0.16457378953789606,
+    #             0.6815536611211676
+    #         ],
+    #         camera_axes="ros",
+    #         sensor_config=RealsenseD436RgbSensorConfig(),
+    #         parent_entity_name="galbot_one_foxtrot/head_end_effector_mount_link"
+    #     )
+    #     self.front_head_rgb_camera_path = self.simulator.add_sensor(front_head_rgb_camera_config)
+
+    #     # Add front head depth camera (RealSense D436)
+    #     front_head_depth_camera_config = DepthCameraConfig(
+    #         name="front_head_depth_camera",
+    #         prim_path=os.path.join(
+    #             self.robot.prim_path,
+    #             "head_link2",
+    #             "head_end_effector_mount_link",
+    #             "front_head_depth_camera",
+    #         ),
+    #         translation=[
+    #             0.10084319533055261,
+    #             -0.059042081352783105,
+    #             0.03184978861787491
+    #         ],
+    #         rotation=[
+    #             -0.1654571792421115, 
+    #             0.6935589352367344,
+    #             0.16457378953789606,
+    #             0.6815536611211676
+    #         ],
+    #         camera_axes="ros",
+    #         sensor_config=RealsenseD436DepthSensorConfig(),
+    #         parent_entity_name="galbot_one_foxtrot/head_end_effector_mount_link"
+    #     )
+    #     self.front_head_depth_camera_path = self.simulator.add_sensor(front_head_depth_camera_config)
+
+    #     # Add table
+    #     table_config = MeshConfig(
+    #         prim_path="/World/Table",
+    #         mjcf_path=Path()
+    #         .joinpath(self.simulator.synthnova_assets_directory)
+    #         .joinpath("synthnova_assets")
+    #         .joinpath("objects")
+    #         .joinpath("table")
+    #         .joinpath("table.xml"),
+    #         position=[0.65, 0, 0],
+    #         orientation=[0, 0, 0.70711, 0.70711],
+    #         # scale=[0.5, 0.7, 0.5]
+    #     )
+    #     self.simulator.add_object(table_config)
+
+    #     # Add bin
+    #     bin_config = MeshConfig(
+    #         prim_path="/World/Bin",
+    #         mjcf_path=Path()
+    #         .joinpath(self.simulator.synthnova_assets_directory)
+    #         .joinpath("synthnova_assets")
+    #         .joinpath("objects")
+    #         .joinpath("bin")
+    #         .joinpath("bin.xml"),
+    #         position=[0.7, -0.1, 0.55],
+    #         orientation=[0, 0, 0.70711, 0.70711],
+    #     )
+    #     self.simulator.add_object(bin_config)
+
+    #     # Add cube
+    #     cube_config = CuboidConfig(
+    #         prim_path="/World/Cube",
+    #         position=[0.65, 0.2, 0.56],
+    #         orientation=[0, 0, 0, 1],
+    #         scale=[0.05, 0.05, 0.05],
+    #         color=[0.5, 0.5, 0.5],  # Gray color
+    #     )
+    #     self.simulator.add_object(cube_config)
+
+    #     # Initialize the simulator
+    #     self.simulator.initialize()
+
+    #     bin_state = self.simulator.get_object_state("/World/Bin")
+    #     self.bin_position = bin_state["position"]
+    #     self.bin_orientation = bin_state["orientation"]
+
+
     def _setup_interface(self):
         galbot_interface_config = GalbotInterfaceConfig()
 
@@ -606,7 +738,7 @@ class IOAIEnv:
             world_orientation: Orientation in world frame [qx, qy, qz, qw]
             
         Returns:
-            Tuple of (robot_position, robot_orientation) in robot base frame
+            tuple of (robot_position, robot_orientation) in robot base frame
         """
         from scipy.spatial.transform import Rotation
         
@@ -635,7 +767,7 @@ class IOAIEnv:
             robot_orientation: Orientation in robot base frame [qx, qy, qz, qw]
             
         Returns:
-            Tuple of (world_position, world_orientation) in world frame
+            tuple of (world_position, world_orientation) in world frame
         """
         from scipy.spatial.transform import Rotation
         
@@ -790,13 +922,279 @@ class IOAIEnv:
         # Return pose in base link frame [x, y, z, qx, qy, qz, qw]
         return np.concatenate([tcp_position_base, tcp_orientation_base])
 
+    def camera_to_world_frame(self, camera_position, camera_orientation):
+        """Transform pose from camera frame to world frame.
+        
+        Args:
+            camera_position: Position in camera frame [x, y, z]
+            camera_orientation: Orientation in camera frame [qx, qy, qz, qw]
+            
+        Returns:
+            Tuple of (world_position, world_orientation) in world frame
+        """
+        from scipy.spatial.transform import Rotation
+        
+        # Get camera pose in world frame
+        camera_prim_path = self.front_head_rgb_camera_path
+        camera_state = self.simulator.get_sensor_state(camera_prim_path)
+        camera_world_position = camera_state["transform_to_base_link"]["position"]
+        camera_world_orientation = camera_state["transform_to_base_link"]["orientation"]
+        
+        # Create transformation matrices
+        camera_world_rot = Rotation.from_quat(camera_world_orientation)
+        camera_local_rot = Rotation.from_quat(camera_orientation)
+        
+        # Transform position: rotate and add camera world position
+        world_position = camera_world_rot.apply(camera_position) + camera_world_position
+        
+        # Transform orientation: compose rotations
+        world_orientation = (camera_world_rot * camera_local_rot).as_quat()
+        
+        return world_position, world_orientation
+
+    def world_to_camera_frame(self, world_position, world_orientation):
+        """Transform pose from world frame to camera frame.
+        
+        Args:
+            world_position: Position in world frame [x, y, z]
+            world_orientation: Orientation in world frame [qx, qy, qz, qw]
+            
+        Returns:
+            Tuple of (camera_position, camera_orientation) in camera frame
+        """
+        from scipy.spatial.transform import Rotation
+        
+        # Get camera pose in world frame
+        camera_prim_path = self.front_head_rgb_camera_path
+        camera_state = self.simulator.get_sensor_state(camera_prim_path)
+        camera_world_position = camera_state["position"]
+        camera_world_orientation = camera_state["orientation"]
+        
+        # Create transformation matrices
+        camera_world_rot = Rotation.from_quat(camera_world_orientation)
+        world_rot = Rotation.from_quat(world_orientation)
+        
+        # Transform position: subtract camera position and rotate
+        relative_position = world_position - camera_world_position
+        camera_position = camera_world_rot.inv().apply(relative_position)
+        
+        # Transform orientation: compose rotations
+        camera_orientation = (camera_world_rot.inv() * world_rot).as_quat()
+        
+        return camera_position, camera_orientation
+
+    
+    def get_camera_images(self):
+        """Get RGB and depth images from the front head camera.
+        
+        Returns:
+            tuple of (rgb_image, depth_image) or (rgb_image, None) if depth not available
+        """
+        try:
+            # Get RGB image
+            rgb_image = self.interface.front_head_camera.get_rgb()
+            
+            # Get depth image if available
+            depth_image = None
+            try:
+                depth_image = self.interface.front_head_camera.get_depth()
+            except:
+                pass  # Depth image not available
+                
+            return rgb_image, depth_image
+        except Exception as e:
+            print(f"Error getting camera images: {e}")
+            return None, None
+
+    def detect_objects_vision(self) -> list[DetectedObject]:
+        """Detect objects using vision model"""
+        current_time = time.time()
+        
+        # Check detection frequency
+        if current_time - self.last_detection_time < self.detection_interval:
+            return self.detected_objects
+        
+        # Get camera images
+        rgb_image, depth_image = self.get_camera_images()
+        
+        if rgb_image is None:
+            return self.detected_objects
+        
+        # Run vision model detection
+        detected_objects = self.vision_model.detect_objects(rgb_image, depth_image)
+        
+        # Update detection results
+        self.detected_objects = detected_objects
+        self.last_detection_time = current_time
+        
+        return detected_objects
+
+    def get_object_pose_from_vision(self, target_class: str = "cube") -> Optional[tuple[np.ndarray, np.ndarray]]:
+        """Get object pose from vision detection"""
+        # Detect objects using vision
+        detected_objects = self.detect_objects_vision()
+        
+        # Find target object
+        target_object = None
+        for obj in detected_objects:
+            if obj.class_name.lower() == target_class.lower():
+                target_object = obj
+                break
+        
+        if target_object is None:
+            print(f"Target object '{target_class}' not detected")
+            return None
+        
+        # Transform from camera frame to world frame
+        world_position, world_orientation = self.camera_to_world_frame(
+            target_object.position, target_object.orientation
+        )
+        
+        return world_position, world_orientation
+
+    def compute_simple_ik(self, start_joint, target_pose, arm_id="left_arm"):
+        """Compute inverse kinematics using Mink.
+        
+        Args:
+            start_joint: Initial joint configuration (not used in current implementation)
+            target_pose: Target pose [x, y, z, qx, qy, qz, qw] in robot base frame
+            arm_id: The ID of the arm, either "left_arm" or "right_arm"
+            
+        Returns:
+            Target joint configuration for the specified arm
+        """
+        # Transform target pose from robot frame to world frame for IK
+        target_position = target_pose[:3]
+        target_orientation = target_pose[3:7]
+        world_position, world_orientation = self.robot_to_world_frame(target_position, target_orientation)
+        
+        # Set target for chassis
+        chassis_target = mink.SE3.from_rotation_and_translation(
+            rotation=mink.SO3(wxyz=xyzw_to_wxyz(self.robot.get_orientation())),
+            translation=self.robot.get_position()
+        )
+        self.tasks["chassis"].set_target(chassis_target)
+
+        # Set target for torso
+        import mujoco
+        torso_body_id = mujoco.mj_name2id(self.simulator.model._model, mujoco.mjtObj.mjOBJ_BODY, self.robot.namespace + "torso_base_link")
+        torso_target = mink.SE3.from_rotation_and_translation(
+            rotation=mink.SO3(wxyz=self.simulator.data.xquat[torso_body_id]),
+            translation=self.simulator.data.xpos[torso_body_id]
+        )
+        self.tasks["torso"].set_target(torso_target)
+
+        # Set target for posture
+        self.tasks["posture"].set_target_from_configuration(self.mink_config)
+
+        # Set target for the specified arm using world frame pose
+        if arm_id == "left_arm":
+            target = mink.SE3.from_rotation_and_translation(
+                rotation=mink.SO3(wxyz=xyzw_to_wxyz(world_orientation)),
+                translation=world_position
+            )
+            self.tasks["left_arm"].set_target(target)
+            tasks = [self.tasks["torso"], self.tasks["posture"], self.tasks["chassis"], self.tasks["left_arm"]]
+        elif arm_id == "right_arm":
+            target = mink.SE3.from_rotation_and_translation(
+                rotation=mink.SO3(wxyz=xyzw_to_wxyz(world_orientation)),
+                translation=world_position
+            )
+            self.tasks["right_arm"].set_target(target)
+            tasks = [self.tasks["torso"], self.tasks["posture"], self.tasks["chassis"], self.tasks["right_arm"]]
+        else:
+            raise ValueError(f"Invalid arm_id: {arm_id}")
+        
+        # Iterative IK solving to get final positions
+        dt = 1e-3
+        max_iterations = 50
+        position_tolerance = 1e-4
+        orientation_tolerance = 1e-4
+        
+        for iteration in range(max_iterations):
+            # Solve IK for velocity
+            vel = mink.solve_ik(
+                self.mink_config,
+                tasks,
+                dt,
+                self.solver,
+                self.damping,
+                limits=[self.velocity_limit] if False else None
+            )
+            
+            # Integrate to update configuration
+            self.mink_config.integrate_inplace(vel, dt)
+            
+            # Check convergence for the specified arm
+            error = self.tasks[arm_id].compute_error(self.mink_config)
+            pos_error = np.linalg.norm(error[:3])
+            ori_error = np.linalg.norm(error[3:])
+            if pos_error < position_tolerance and ori_error < orientation_tolerance:
+                break
+
+        # Get final joint positions
+        joint_positions = self.mink_config.q
+
+        # Extract joint positions for the specified arm
+        if arm_id == "left_arm":
+            arm_joint_indexes = self.interface.left_arm.joint_indexes
+        else:  # right_arm
+            arm_joint_indexes = self.interface.right_arm.joint_indexes
+        
+        arm_joint_positions = joint_positions[arm_joint_indexes]
+        return arm_joint_positions
+
+    def compute_simple_fk(self, arm_id="left_arm"):
+        """Compute forward kinematics using ground truth from simulator.
+        
+        Args:
+            arm_id: The ID of the arm, either "left_arm" or "right_arm"
+            
+        Returns:
+            TCP pose in base link frame [x, y, z, qx, qy, qz, qw]
+        """
+        if arm_id == "left_arm":
+            # Get left gripper TCP pose from simulator
+            position, quaternion = self.get_left_gripper_pose()
+        elif arm_id == "right_arm":
+            # Get right gripper TCP pose from simulator
+            position, quaternion = self.get_right_gripper_pose()
+        else:
+            raise ValueError(f"Invalid arm_id: {arm_id}")
+        
+        # Transform from world frame to base link frame
+        base_position = self.robot.get_position()
+        base_orientation = self.robot.get_orientation()
+        
+        # Create transformation matrices
+        from scipy.spatial.transform import Rotation
+        
+        # World to base transformation
+        base_rot = Rotation.from_quat(base_orientation)
+        base_rot_matrix = base_rot.as_matrix()
+        
+        # TCP in world frame
+        tcp_rot = Rotation.from_quat(quaternion)
+        tcp_rot_matrix = tcp_rot.as_matrix()
+        
+        # Transform position: subtract base position and rotate
+        relative_position = position - base_position
+        tcp_position_base = base_rot.inv().apply(relative_position)
+        
+        # Transform orientation: compose rotations
+        tcp_orientation_base = (base_rot.inv() * tcp_rot).as_quat()
+        
+        # Return pose in base link frame [x, y, z, qx, qy, qz, qw]
+        return np.concatenate([tcp_position_base, tcp_orientation_base])
+
     def _init_pose(self):
         # Initialize robot pose
+        # Initialize robot pose
         poses = {
-            self.interface.head: [0.0, 0.26],
-            self.interface.leg: [0.0821758285164833, 0.6340972781181335,0.5227039456367493, -0.00001198422432935331],
-            self.interface.left_arm: [2.0020599365234375,-1.5977126359939575,-0.5948255658149719,-1.694089651107788,-0.0002879792882595211,-0.7909831404685974,-0.00016755158139858395],
-            self.interface.right_arm: [-2.001628875732422,1.6029852628707886,0.6024474501609802,1.6955766677856445,-0.0002391100861132145,0.7967827916145325,-0.00014311698032543063]
+            self.interface.head: [0.0, 0.0],
+            self.interface.leg: [0.2, 0.756, 0.53, 0.0],
+            self.interface.left_arm: [-0.4654513936071508, 1.4785659313201904, -0.6235712173907869, 2.097979784011841, 1.3999720811843872, -0.009971064515411854, 1.0999830961227417],
+            self.interface.right_arm: [0.4654513936071508, -1.4785659313201904, 0.6235712173907869, -2.097979784011841, -1.3999720811843872, 0.009971064515411854, -1.0999830961227417]
         }
         
         for module, pose in poses.items():
@@ -905,16 +1303,38 @@ class IOAIEnv:
                 return True
         return False
 
+    def get_left_gripper_pose(self):
+        tmat = np.eye(4)
+        tmat[:3,:3] = self.simulator.data.site(self.robot.namespace + "left_gripper_tcp").xmat.reshape((3,3))
+        tmat[:3,3] = self.simulator.data.site(self.robot.namespace + "left_gripper_tcp").xpos
+        
+        # Extract position
+        position = tmat[:3, 3]
+        
+        # Extract orientation as quaternion (x, y, z, w)
+        from scipy.spatial.transform import Rotation
+        rotation_matrix = tmat[:3, :3]
+        quaternion = Rotation.from_matrix(rotation_matrix).as_quat()
+        
+        return position, quaternion
+    
+    def get_right_gripper_pose(self):
+        tmat = np.eye(4)
+        tmat[:3,:3] = self.simulator.data.site(self.robot.namespace + "right_gripper_tcp").xmat.reshape((3,3))
+        tmat[:3,3] = self.simulator.data.site(self.robot.namespace + "right_gripper_tcp").xpos
+        
+        # Extract position
+        position = tmat[:3, 3]
 
+        # Extract orientation as quaternion (x, y, z, w)
+        from scipy.spatial.transform import Rotation
+        rotation_matrix = tmat[:3, :3]
+        quaternion = Rotation.from_matrix(rotation_matrix).as_quat()
+        
+        return position, quaternion
+   
     def run(self):
-        #self.simulator.loop()
-        r=True
-        while r:
-            try:
-                print("Steeping")
-                env.simulator.step(10)
-            except:
-                r=False
+        self.simulator.loop()
 
     def stop(self):
         self.simulator.close()

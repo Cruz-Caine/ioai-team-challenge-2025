@@ -193,18 +193,18 @@ class IOAIEnv:
         self.simulator.add_object(cube_config)
 
         # Add toy
-        toy_config = MeshConfig(
-            prim_path="/World/toy",
-            mjcf_path=Path()
-            .joinpath(self.simulator.synthnova_assets_directory)
-            .joinpath("synthnova_assets")
-            .joinpath("objects")
-            .joinpath("toy")
-            .joinpath("toy.xml"),
-            position=[0.7, -0.2, 0.5],
-            orientation=[0, 0, 0, 1],
-        )
-        self.simulator.add_object(toy_config)
+        # toy_config = MeshConfig(
+        #     prim_path="/World/toy",
+        #     mjcf_path=Path()
+        #     .joinpath(self.simulator.synthnova_assets_directory)
+        #     .joinpath("synthnova_assets")
+        #     .joinpath("objects")
+        #     .joinpath("toy")
+        #     .joinpath("toy.xml"),
+        #     position=[0.7, -0.2, 0.5],
+        #     orientation=[0, 0, 0, 1],
+        # )
+        # self.simulator.add_object(toy_config)
 
         # Add extrusion
         extrusion_config = MeshConfig(
